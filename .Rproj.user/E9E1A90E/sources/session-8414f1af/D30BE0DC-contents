@@ -1,0 +1,512 @@
+rmse <- sqrt(mean(error**2))
+lm_model
+lm_model['result']
+lm_model$results
+summary(lm_fit)
+summary(lm_model)
+#train model
+lm_model <- train(mpg ~ hp, data = split_data[[1]], method = "lm")
+### Regression Model - Linear Regression
+library(caret)
+#split data
+train_test_split <- function(data){
+set.seed(42)
+n <- nrow(data)
+id <- sample(n, size=0.8*n)
+train_data <- data[id,]
+test_data <- data[-id,]
+return(list(train_data, test_data))
+}
+split_data <- train_test_split(mtcars)
+#train model
+lm_model <- train(mpg ~ hp, data = split_data[[1]], method = "lm")
+summary(lm_model)
+#score
+p <- predict(lm_model, newdata=split_data[[2]])
+#evaluate
+error <- split_data[[2]]$mpg - p
+rmse <- sqrt(mean(error**2))
+### Regression Model - Linear Regression
+library(caret)
+#split data
+train_test_split <- function(data){
+set.seed(42)
+n <- nrow(data)
+id <- sample(n, size=0.8*n)
+train_data <- data[id,]
+test_data <- data[-id,]
+return(list(train_data, test_data))
+}
+split_data <- train_test_split(mtcars)
+#train model
+lm_model <- train(mpg ~ hp, data = split_data[[1]], method = "lm")
+summary(lm_model)
+lm_model
+#score
+p <- predict(lm_model, newdata=split_data[[2]])
+#evaluate
+error <- split_data[[2]]$mpg - p
+rmse <- sqrt(mean(error**2))
+### Classification Model - Logistics Regression
+library(caret)
+#convert classification params
+mtcars$am <- factor(mtcars$am,
+levels = c(0,1),
+labels = c("Auto", "Manual"))
+#split data
+train_test_split <- function(data){
+set.seed(42)
+n <- nrow(data)
+id <- sample(n, size=0.7*n)
+train_data <- data[id,]
+test_data <- data[-id,]
+return(list(train_data, test_data))
+}
+split_data <- train_test_split(mtcars)
+#train model - logistics regression
+glm_model <- train(am ~ mpg, data = split_data[[1]], method = "glm") #train accuracy = 0.81
+#score and evaluate - logitstics regression
+p <- predict(glm_model, newdata=split_data[[2]])
+acc <- mean(p == split_data[[2]]$am) #test accuracy = 0.6
+summary(glm_model)
+## call library
+library(tidyverse)
+library(caret) # classification and regression tree
+library(mlbench) # collection of ml datasets
+## house price prediction
+data("BostonHousing")
+df <- BostonHousing
+## 0.check if any missing values
+#ถ้าไม่มี NA จะเป็น true ทั้งหมด แล้วเฉลี่ยออกมาเป็น 1 ถ้าไม่เท่าแสดงว่ามี NA
+b <- mean(complete.cases(df))
+## 1.split data
+set.seed(42)
+n <- nrow(df)
+train_id <- sample(1:n, size=0.8*n)
+train_df <- df[train_id,]
+test_df <- df[-train_id,]
+## 2.train model
+## change resampling method
+#train_ctrl <- trainControl(
+#  method = "boot",
+#  number = 25 )
+#train_ctrl <- trainControl(
+#  method = "LOOCV")
+#train_ctrl <- trainControl(
+#  method = "cv", #k-fold
+#  number = 5,)
+train_ctrl <- trainControl(
+method = "repeatedcv", #repeated k-fold
+number = 5,
+repeats = 5 #ให้ทำซ้ำอีก 5 ครั้ง model จะ train ทั้งหมด 25
+)
+# medv = f(crim, rm, age)
+model <- train(medv ~ .,
+data = train_df,
+method = "rf",
+trControl = train_ctrl)
+#model <- train(medv ~ crim + rm + age,
+#               data = train_df,
+#               method = "lm",
+#              trControl = train_ctrl)
+## 3.score model
+p_medv <- predict(model, newdata = test_df)
+## call library
+library(tidyverse)
+library(caret) # classification and regression tree
+library(mlbench) # collection of ml datasets
+## house price prediction
+data("BostonHousing")
+df <- BostonHousing
+## 0.check if any missing values
+#ถ้าไม่มี NA จะเป็น true ทั้งหมด แล้วเฉลี่ยออกมาเป็น 1 ถ้าไม่เท่าแสดงว่ามี NA
+b <- mean(complete.cases(df))
+## 1.split data
+set.seed(42)
+n <- nrow(df)
+train_id <- sample(1:n, size=0.8*n)
+train_df <- df[train_id,]
+test_df <- df[-train_id,]
+## 2.train model
+## change resampling method
+#train_ctrl <- trainControl(
+#  method = "boot",
+#  number = 25 )
+#train_ctrl <- trainControl(
+#  method = "LOOCV")
+#train_ctrl <- trainControl(
+#  method = "cv", #k-fold
+#  number = 5,)
+train_ctrl <- trainControl(
+method = "repeatedcv", #repeated k-fold
+number = 5,
+repeats = 5 #ให้ทำซ้ำอีก 5 ครั้ง model จะ train ทั้งหมด 25
+)
+# medv = f(crim, rm, age)
+model <- train(medv ~ .,
+data = train_df,
+method = "rf",
+trControl = train_ctrl)
+#model <- train(medv ~ crim + rm + age,
+#               data = train_df,
+#               method = "lm",
+#              trControl = train_ctrl)
+## 3.score model
+p_medv <- predict(model, newdata = test_df)
+## 4.evaluate model
+#compare RMSE of train vs. test data
+train_rmse <- model$results$RMSE
+#> model$results
+#intercept     RMSE  Rsquared     MAE    RMSESD RsquaredSD     MAESD
+#1      TRUE 6.059216 0.5506949 3.94915 0.8371703  0.1141004 0.3722899
+sq_error  <- sqrt(mean((p_medv - test_df$medv)**2))
+#summary : good fit > 6.059216 vs 6.289014
+library(tidyverse)
+library(mlbench)
+library(caret)
+## random forest
+## clean data
+df <- PimaIndiansDiabetes %>% drop_na()
+library(tidyverse)
+library(mlbench)
+library(caret)
+## random forest
+## clean data
+df <- PimaIndiansDiabetes %>% drop_na()
+library(tidyverse)
+library(mlbench)
+library(caret)
+library(tidyverse)
+library(mlbench)
+library(caret)
+## random forest
+## clean data
+df <- PimaIndiansDiabetes %>% drop_na()
+library(tidyverse)
+library(mlbench)
+library(caret)
+## random forest
+## clean data
+df <- PimaIndiansDiabetes %>% drop_na()
+library(tidyverse)
+library(mlbench)
+library(caret)
+## random forest
+## clean data
+df <- PimaIndiansDiabetes %>% drop_na()
+## call library
+library(tidyverse)
+library(caret) # classification and regression tree
+library(mlbench) # collection of ml datasets
+## house price prediction
+data("BostonHousing")
+df <- BostonHousing
+## 0.check if any missing values
+#ถ้าไม่มี NA จะเป็น true ทั้งหมด แล้วเฉลี่ยออกมาเป็น 1 ถ้าไม่เท่าแสดงว่ามี NA
+b <- mean(complete.cases(df))
+## 1.split data
+set.seed(42)
+n <- nrow(df)
+train_id <- sample(1:n, size=0.8*n)
+train_df <- df[train_id,]
+test_df <- df[-train_id,]
+## 2.train model
+## change resampling method
+#train_ctrl <- trainControl(
+#  method = "boot",
+#  number = 25 )
+#train_ctrl <- trainControl(
+#  method = "LOOCV")
+#train_ctrl <- trainControl(
+#  method = "cv", #k-fold
+#  number = 5,)
+train_ctrl <- trainControl(
+method = "repeatedcv", #repeated k-fold
+number = 5,
+repeats = 1 #ให้ทำซ้ำอีก 5 ครั้ง model จะ train ทั้งหมด 25
+)
+# medv = f(crim, rm, age)
+model <- train(medv ~ .,
+data = train_df,
+method = "rf",
+trControl = train_ctrl)
+#model <- train(medv ~ crim + rm + age,
+#               data = train_df,
+#               method = "lm",
+#              trControl = train_ctrl)
+## 3.score model
+p_medv <- predict(model, newdata = test_df)
+## 4.evaluate model
+#compare RMSE of train vs. test data
+train_rmse <- model$results$RMSE
+#> model$results
+#intercept     RMSE  Rsquared     MAE    RMSESD RsquaredSD     MAESD
+#1      TRUE 6.059216 0.5506949 3.94915 0.8371703  0.1141004 0.3722899
+sq_error  <- sqrt(mean((p_medv - test_df$medv)**2))
+#summary : good fit > 6.059216 vs 6.289014
+model
+summary(model)
+## load library
+library(tidyverse)
+library(caret)
+library(mlbench)
+## predict diabetes
+# 0.clean missing values
+df <- PimaIndiansDiabetes %>%
+drop_na()
+library(tidyverse)
+library(caret)
+library(mlbench)
+library(tidyverse)
+library(caret)
+library(mlbench)
+## predict diabetes
+# 0.clean missing values
+df <- PimaIndiansDiabetes %>%
+drop_na()
+library(caret)
+library(mlbench)
+#Kappa ยิ่งเยอะยิ่งดี ใช้กับ binary classification ที่เป็น imbalance pos/neg != 50:50
+#ROC ยิ่งเข้าใกล้ 1 ยิ่งดี
+#Accuracy
+#RMSE
+#AUC (area under the curve)
+## load library
+library(tidyverse)
+library(caret)
+library(mlbench)
+## predict diabetes
+# 0.clean missing values
+df <- PimaIndiansDiabetes %>%
+drop_na()
+## load library
+library(tidyverse)
+library(caret)
+library(mlbench)
+## predict diabetes
+# 0.clean missing values
+df <- PimaIndiansDiabetes %>%
+drop_na()
+acc <- mean(p == split_data[[2]]$am) #test accuracy = 0.6
+### Classification Model - Logistics Regression
+library(caret)
+#convert classification params
+mtcars$am <- factor(mtcars$am,
+levels = c(0,1),
+labels = c("Auto", "Manual"))
+#split data
+train_test_split <- function(data){
+set.seed(42)
+n <- nrow(data)
+id <- sample(n, size=0.7*n)
+train_data <- data[id,]
+test_data <- data[-id,]
+return(list(train_data, test_data))
+}
+split_data <- train_test_split(mtcars)
+#train model - logistics regression
+glm_model <- train(am ~ mpg, data = split_data[[1]], method = "glm") #train accuracy = 0.81
+#score and evaluate - logitstics regression
+p <- predict(glm_model, newdata=split_data[[2]])
+acc <- mean(p == split_data[[2]]$am) #test accuracy = 0.6
+glm_model
+summary(glm_model)
+## load library
+library(tidyverse)
+library(caret)
+library(mlbench)
+## predict diabetes
+# 0.clean missing values
+data("PimaIndiansDiabetes")
+df <- PimaIndiansDiabetes %>%
+drop_na()
+# check data
+is_cleaned <- mean(complete.cases(df))==1
+# 1.split data
+set.seed(42)
+n <- nrow(df)
+id <- sample(1:n, size=n*0.8)
+train_df <- df[id,]
+test_df <- df[-id,]
+# 2.train model
+ctrl <- trainControl(method = "cv", #k-fold resampling
+number = 5,
+verboseIter = TRUE,)
+k_grid <- data.frame(k = c(3,5,7,9))
+model <- train(diabetes ~ glucose + pressure + age + mass,
+data = train_df,
+method = "knn",
+metric = "Accuracy",
+trControl = ctrl,
+tuneGrid = k_grid, # customize k
+preProcess = c("center","scale")) # standardization
+#preProcess = c("range") #normalization
+#metrics
+#Kappa ยิ่งเยอะยิ่งดี ใช้กับ binary classification ที่เป็น imbalance pos/neg != 50:50
+#ROC ยิ่งเข้าใกล้ 1 ยิ่งดี
+#Accuracy
+#RMSE
+#AUC (area under the curve)
+## predict diabetes
+# 0.clean missing values
+#data("PimaIndiansDiabetes")
+df <- PimaIndiansDiabetes %>%
+drop_na()
+## load library
+library(tidyverse)
+library(caret)
+library(mlbench)
+## predict diabetes
+# 0.clean missing values
+#data("PimaIndiansDiabetes")
+df <- PimaIndiansDiabetes %>%
+drop_na()
+## load library
+library(tidyverse)
+library(caret)
+library(mlbench)
+## predict diabetes
+# 0.clean missing values
+data("PimaIndiansDiabetes")
+df <- PimaIndiansDiabetes %>%
+drop_na()
+# check data
+is_cleaned <- mean(complete.cases(df))==1
+# 1.split data
+set.seed(42)
+n <- nrow(df)
+id <- sample(1:n, size=n*0.8)
+train_df <- df[id,]
+test_df <- df[-id,]
+# 2.train model
+ctrl <- trainControl(method = "cv", #k-fold resampling
+number = 5,
+verboseIter = TRUE,)
+k_grid <- data.frame(k = c(3,5,7,9))
+model <- train(diabetes ~ glucose + pressure + age + mass,
+data = train_df,
+method = "knn",
+metric = "Accuracy",
+trControl = ctrl,
+tuneGrid = k_grid, # customize k
+preProcess = c("center","scale")) # standardization
+#preProcess = c("range") #normalization
+#metrics
+#Kappa ยิ่งเยอะยิ่งดี ใช้กับ binary classification ที่เป็น imbalance pos/neg != 50:50
+#ROC ยิ่งเข้าใกล้ 1 ยิ่งดี
+#Accuracy
+#RMSE
+#AUC (area under the curve)
+model
+summary(model)
+sq_error  <- sqrt(mean((p_medv - test_df$medv)**2))
+## call library
+library(tidyverse)
+library(caret) # classification and regression tree
+library(mlbench) # collection of ml datasets
+## house price prediction
+data("BostonHousing")
+df <- BostonHousing
+## 0.check if any missing values
+#ถ้าไม่มี NA จะเป็น true ทั้งหมด แล้วเฉลี่ยออกมาเป็น 1 ถ้าไม่เท่าแสดงว่ามี NA
+b <- mean(complete.cases(df))
+## 1.split data
+set.seed(42)
+n <- nrow(df)
+train_id <- sample(1:n, size=0.8*n)
+train_df <- df[train_id,]
+test_df <- df[-train_id,]
+## 2.train model
+## change resampling method
+#train_ctrl <- trainControl(
+#  method = "boot",
+#  number = 25 )
+#train_ctrl <- trainControl(
+#  method = "LOOCV")
+#train_ctrl <- trainControl(
+#  method = "cv", #k-fold
+#  number = 5,)
+train_ctrl <- trainControl(
+method = "repeatedcv", #repeated k-fold
+number = 5,
+repeats = 5 #ให้ทำซ้ำอีก 5 ครั้ง model จะ train ทั้งหมด 25
+)
+# medv = f(crim, rm, age)
+model <- train(medv ~ .,
+data = train_df,
+method = "rf",
+trControl = train_ctrl)
+#model <- train(medv ~ crim + rm + age,
+#               data = train_df,
+#               method = "lm",
+#              trControl = train_ctrl)
+## 3.score model
+p_medv <- predict(model, newdata = test_df)
+## 4.evaluate model
+#compare RMSE of train vs. test data
+train_rmse <- model$results$RMSE
+#> model$results
+#intercept     RMSE  Rsquared     MAE    RMSESD RsquaredSD     MAESD
+#1      TRUE 6.059216 0.5506949 3.94915 0.8371703  0.1141004 0.3722899
+sq_error  <- sqrt(mean((p_medv - test_df$medv)**2))
+#summary : good fit > 6.059216 vs 6.289014
+model
+summary(model)
+library(tidyverse)
+library(mlbench)
+library(caret)
+## random forest
+## clean data
+data("PimaIndiansDiabetes")
+df <- PimaIndiansDiabetes %>% drop_na()
+mean(complete.cases(df)) == 1
+## split data
+set.seed(42)
+n <- nrow(df)
+id <- sample(1:n, size=0.8*n)
+train_data <- df[id,]
+test_data <- df[-id,]
+## train model
+set.seed(42)
+ctrl <- trainControl(method = "cv",
+number = 5,
+verboseIter = TRUE)
+mtry.grid <- data.frame(mtry = c(3,4,5))
+model <- train(diabetes ~.,
+data = train_data,
+method = "rf",
+trControl = ctrl,
+tuneGrid = mtry.grid)
+## score and evaluate
+p <- predict(model, newdata = test_data)
+mean(p == test_data$diabetes) #0.7857143
+model
+summary(model)
+mean(test_data$am == test_data$pred)
+## Logistics Regression
+mtcars %>% head()
+str(mtcars)
+glimpse(mtcars)
+## convert am to factor : ถ้า variable เป็น 0, 1 ต้องเปลี่ยนเป็น numeric ให้กลายเป็น categorical
+mtcars$am <- factor(mtcars$am,
+levels = c(0,1),
+labels = c("Auto", "Manual"))
+class(mtcars$am)
+table(mtcars$am) #count
+## Split Data
+set.seed(42)
+n <- nrow(mtcars)
+id <- sample(1:n, size=n*0.7) #ให้ 70% ไปเป็น train data
+train_data <- mtcars[id, ]
+test_data <- mtcars[-id, ]
+## Train Model
+logis_model <- glm(am ~ mpg, data = train_data, family="binomial")
+p_train <- predict(logis_model, type = "response") #output เป็น probability
+train_data$pred <- if_else(p_train >= 0.5, "Manual", "Auto")
+mean(train_data$am == train_data$pred)
+## Test model
+p_test <- predict(logis_model, newdata = test_data, type="response")
+test_data$pred <- if_else(p_test >= 0.5, "Manual", "Auto")
+mean(test_data$am == test_data$pred)
+logis_model
+summary(logis_model)

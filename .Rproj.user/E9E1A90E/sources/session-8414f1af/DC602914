@@ -1,0 +1,27 @@
+{
+    "id": "DC602914",
+    "path": "/cloud/project/DSB/Sampling.R",
+    "project_path": "DSB/Sampling.R",
+    "type": "r_source",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1773994796423.0,
+    "source_on_save": false,
+    "relative_order": 11,
+    "properties": {
+        "tempName": "Untitled1",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "17,34",
+        "scrollLine": "0"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1774780458,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1774780458921,
+    "read_only": false,
+    "read_only_alternatives": []
+}
